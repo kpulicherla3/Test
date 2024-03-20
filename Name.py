@@ -1,34 +1,30 @@
 import pandas as pd
 
+# Read the input Excel file
+df = pd.read_excel('input.xlsx')
+
 # Function to convert sizes to gigabytes
-def convert_to_gb(size_str):
-    size, unit = size_str[:-1], size_str[-1]
-    if unit == 'K':
-        return float(size) / (1024 * 1024)
+def convert_to_gb(size, unit):
+    if unit == 'KB':
+        return size / (1024 * 1024)
     elif unit == 'M':
-        return float(size) / 1024
+        return size / 1024
+    elif unit == 'MB':
+        return size / 1024
     elif unit == 'G':
-        return float(size)
+        return size
+    elif unit == 'K':
+        return size / (1024 * 1024)
     else:
         return None
 
-# Read the dispersed text file
-with open('output.txt', 'r') as file:
-    lines = file.readlines()
+# Convert sizes to gigabytes and remove unit columns
+df['Actual Size (GB)'] = df.apply(lambda row: convert_to_gb(row['Actual Size'], row['Actual Size Unit']), axis=1)
+df['Disk Size (GB)'] = df.apply(lambda row: convert_to_gb(row['Disk Size'], row['Disk Size Unit']), axis=1)
+df.drop(columns=['Actual Size', 'Actual Size Unit', 'Disk Size', 'Disk Size Unit'], inplace=True)
 
-# Process lines and create a list of dictionaries
-data = []
-for line in lines:
-    last_space_index = line.rfind(' ')
-    sizes = line[:last_space_index].strip()
-    file_name = line[last_space_index+1:].strip()
-    apparent_size, disk_usage_size = sizes.split()
-    apparent_size_gb = convert_to_gb(apparent_size)
-    disk_usage_size_gb = convert_to_gb(disk_usage_size)
-    data.append({'Apparent Size (GB)': apparent_size_gb, 'Disk Usage Size (GB)': disk_usage_size_gb, 'File': file_name})
+# Convert 'Table' values to uppercase
+df['Table'] = df['Table'].str.upper()
 
-# Convert list of dictionaries to DataFrame
-df = pd.DataFrame(data)
-
-# Save DataFrame to Excel
+# Save the modified DataFrame to a new Excel file
 df.to_excel('output.xlsx', index=False)
