@@ -19,7 +19,7 @@ with open('output.txt', 'r') as file:
 # Process lines and create a list of dictionaries
 data = []
 for line in lines:
-    sizes, file_name = line.split(maxsplit=1)
+    sizes, file_name = line.rsplit(maxsplit=1)
     apparent_size, disk_usage_size = sizes.split()
     apparent_size_gb = convert_to_gb(apparent_size)
     disk_usage_size_gb = convert_to_gb(disk_usage_size)
